@@ -4,329 +4,389 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NNU 2026 短期交流项目 · 游学报告</title>
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome 图标 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Phosphor 图标库 -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
-    html { scroll-behavior: smooth; }
-    /* 东方雅致动态渐变背景 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    
     body {
-      background-color: #fcfbf7;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    .font-serif-sc {
+      font-family: 'Noto Serif SC', Georgia, serif;
+    }
+    
+    /* 华丽动态极光渐变背景 */
+    .bg-mesh-pattern {
+      background-color: #faf7f2;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(180, 83, 9, 0.08) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(217, 119, 6, 0.05) 0px, transparent 60%),
-        radial-gradient(at 100% 100%, rgba(67, 56, 202, 0.06) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(13, 148, 136, 0.08) 0px, transparent 50%);
+        radial-gradient(at 10% 15%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 10%, rgba(225, 29, 72, 0.12) 0px, transparent 45%),
+        radial-gradient(at 50% 45%, rgba(147, 51, 234, 0.08) 0px, transparent 60%),
+        radial-gradient(at 85% 85%, rgba(217, 119, 6, 0.16) 0px, transparent 50%),
+        radial-gradient(at 15% 90%, rgba(236, 72, 153, 0.12) 0px, transparent 50%);
       background-attachment: fixed;
     }
+
+    /* 细腻光泽卡片样式 */
     .glass-card {
-      background: rgba(255, 255, 255, 0.78);
+      background: rgba(255, 255, 255, 0.72);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 12px 36px -8px rgba(120, 53, 15, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 16px 36px -12px rgba(120, 53, 15, 0.08);
     }
-    [contenteditable="true"]:hover {
-      outline: 2px dashed #d97706;
+    
+    /* 编辑模式下的交互提示线 */
+    .editing [contenteditable="true"] {
+      outline: 2px dashed rgba(217, 119, 6, 0.4);
       outline-offset: 4px;
       border-radius: 4px;
-      cursor: text;
     }
-    [contenteditable="true"]:focus {
-      outline: 2px solid #b45309;
-      background: rgba(254, 243, 199, 0.35);
-      border-radius: 4px;
+    .editing [contenteditable="true"]:focus {
+      outline: 2px solid #d97706;
+      background: rgba(254, 243, 199, 0.4);
     }
   </style>
 </head>
-<body class="text-stone-800 antialiased font-sans min-h-screen relative pb-28">
+<body class="bg-mesh-pattern text-stone-800 antialiased min-h-screen selection:bg-amber-200">
 
-  <!-- 顶部悬浮控制栏（用于编辑与全网发布） -->
-  <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
-    <button onclick="openModal()" class="px-4 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white font-medium text-sm shadow-lg hover:shadow-amber-900/20 transition-all flex items-center gap-2">
-      <i class="fa-solid fa-plus"></i> 添加新心得
+  <!-- 浮动控制工具栏（仅自己编辑与导出时使用） -->
+  <aside class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-stone-900/90 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-2xl border border-stone-700/60 transition-all duration-300">
+    <button id="toggleEditBtn" onclick="toggleEditMode()" class="flex items-center gap-2 text-xs md:text-sm font-medium hover:text-amber-300 transition">
+      <i class="ph-bold ph-pencil-simple text-amber-400"></i>
+      <span id="editBtnText">开启自由编辑</span>
     </button>
-    <button onclick="exportAndDownload()" class="px-4 py-2.5 rounded-full bg-stone-900 hover:bg-stone-800 text-white font-medium text-sm shadow-lg hover:shadow-black/20 transition-all flex items-center gap-2" title="保存修改并下载，上传至GitHub即可全网生效">
-      <i class="fa-solid fa-cloud-arrow-down"></i> 导出发布文件
+    <div class="h-4 w-px bg-stone-700"></div>
+    <button onclick="exportStaticHTML()" class="flex items-center gap-2 text-xs md:text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-stone-950 px-3.5 py-1.5 rounded-full transition shadow-md">
+      <i class="ph-bold ph-download-simple"></i>
+      <span>导出网页 (放GitHub)</span>
     </button>
-  </div>
+  </aside>
 
-  <!-- 顶部导航 -->
-  <nav class="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-amber-900/10">
-    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse"></span>
-        <span class="font-bold text-lg tracking-wider text-stone-900">NNU 2026</span>
+  <!-- 隐藏的文件选择器（用于点击图片更换） -->
+  <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+
+  <!-- 顶部轻奢导航栏 -->
+  <nav class="sticky top-0 z-40 bg-white/60 backdrop-blur-xl border-b border-amber-100/60 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-white font-black text-sm shadow-md">N</span>
+        <span class="font-serif-sc font-bold tracking-tight text-stone-900 text-lg">NNU 2026 游学纪实</span>
       </div>
-      <div class="space-x-6 text-sm text-stone-600 font-medium">
-        <a href="#overview" class="hover:text-amber-700 transition">概览</a>
-        <a href="#cards-container" class="hover:text-amber-700 transition">图文手记</a>
-        <a href="#summary" class="hover:text-amber-700 transition">游学总结</a>
+      <div class="flex items-center gap-2 text-xs font-semibold text-amber-900/70 bg-amber-100/70 px-3.5 py-1.5 rounded-full border border-amber-200/50">
+        <i class="ph-fill ph-sparkle text-amber-600"></i>
+        <span>独立研学报告</span>
       </div>
     </div>
   </nav>
 
-  <!-- 1. Hero 封面区 -->
-  <header id="overview" class="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
-    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-900 text-xs font-semibold mb-6 shadow-sm">
-      <i class="fa-solid fa-bookmark text-amber-700"></i> 独立报告 · 游学成果呈现
+  <!-- 1. Hero 头部封面区 -->
+  <header class="max-w-6xl mx-auto px-6 pt-16 pb-12 text-center relative">
+    <!-- 装饰性光斑球 -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-300/20 blur-3xl -z-10 rounded-full pointer-events-none"></div>
+
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/80 border border-amber-200/80 rounded-full shadow-sm text-xs font-semibold text-amber-800 mb-6">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span contenteditable="false" data-editable>南京师范大学 · 马来亚大学 短期学习交流班</span>
     </div>
-    
-    <!-- 可直接编辑的标题与副标题 -->
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-stone-900 mb-5 leading-tight" contenteditable="true" id="report-title">
-      金陵行记 · 学思践悟
+
+    <h1 class="text-4xl md:text-6xl font-black font-serif-sc tracking-tight text-stone-900 mb-6 leading-tight" contenteditable="false" data-editable>
+      金陵秋色与学思之途
     </h1>
-    <p class="text-stone-600 max-w-2xl mx-auto text-base md:text-lg mb-10 leading-relaxed" contenteditable="true" id="report-subtitle">
-      南京师范大学 2026 短期学习交流班 · 马来亚大学学生独立报告
+    
+    <p class="text-stone-600 max-w-2xl mx-auto text-base md:text-lg mb-10 leading-relaxed" contenteditable="false" data-editable>
+      走过随园黛瓦、古都烟水与学术长廊的深刻对话。记录镜头捕捉的浮光掠影，以及在不同学术与文化视界中激荡的心得手记。
     </p>
 
-    <!-- 封面大图区 -->
-    <div class="relative group rounded-3xl overflow-hidden glass-card p-3 shadow-xl">
-      <div class="relative aspect-[16/9] max-h-[460px] w-full rounded-2xl overflow-hidden bg-stone-100">
-        <img id="hero-img" src="https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1600&q=80" alt="封面" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <label class="cursor-pointer bg-white text-stone-900 px-4 py-2 rounded-xl text-sm font-semibold shadow hover:bg-stone-50 transition flex items-center gap-2">
-            <i class="fa-solid fa-camera"></i> 更换封面图
-            <input type="file" accept="image/*" class="hidden" onchange="changeHeroImage(event)">
-          </label>
-        </div>
+    <!-- 封面大图区（带点击更换交互） -->
+    <div class="relative group rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 aspect-[16/8] max-h-[500px] w-full mx-auto">
+      <img id="heroImage" src="https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1600&auto=format&fit=crop" alt="封面主图" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+      <div class="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent flex items-end p-8">
+        <p class="text-white/90 text-sm md:text-base font-serif-sc tracking-wide drop-shadow-md" contenteditable="false" data-editable>
+          📷 研学纪程 · 南京师范大学随园校区
+        </p>
       </div>
+      <!-- 编辑时更换图片按钮 -->
+      <button onclick="triggerImageUpload('heroImage')" class="edit-only hidden absolute top-4 right-4 bg-stone-900/80 hover:bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-lg backdrop-blur-md transition flex items-center gap-2">
+        <i class="ph-bold ph-camera"></i> 更换封面图
+      </button>
     </div>
   </header>
 
   <!-- 2. 图文心得主体区 -->
-  <main class="max-w-5xl mx-auto px-6 py-10">
-    <div class="flex items-end justify-between border-b border-amber-900/10 pb-4 mb-12">
+  <main class="max-w-6xl mx-auto px-6 py-14">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 pb-6 border-b border-stone-200/60 gap-4">
       <div>
-        <h2 class="text-2xl md:text-3xl font-bold text-stone-900">游学手记 · 图文集</h2>
-        <p class="text-stone-500 text-sm mt-1">点击任意文字可直接编辑修改内容</p>
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Reflections & Perspectives</span>
+        <h2 class="text-3xl md:text-4xl font-serif-sc font-bold text-stone-900 mt-1">图文心得 · 研学手记</h2>
       </div>
-      <span class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-        双击文字可改
-      </span>
+      <p class="text-xs md:text-sm text-stone-500 max-w-sm">
+        点击卡片文字可直接修改内容；点击更换图片可载入本地摄影作品。
+      </p>
     </div>
 
-    <!-- 动态卡片容器 -->
-    <div id="cards-container" class="space-y-16">
-      
-      <!-- 初始心得卡片 1 -->
-      <article class="journal-card glass-card rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 relative group transition hover:-translate-y-1 duration-300">
-        <button onclick="removeCard(this)" class="absolute top-4 right-4 text-stone-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-2 text-sm" title="删除该条记录">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-        <div class="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 relative group/img">
-          <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80" alt="讲座" class="w-full h-full object-cover">
-          <label class="absolute inset-0 bg-stone-900/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center cursor-pointer text-white text-xs font-medium gap-1">
-            <i class="fa-solid fa-image"></i> 更换照片
-            <input type="file" accept="image/*" class="hidden" onchange="replaceCardImage(event, this)">
-          </label>
-        </div>
-        <div class="w-full md:w-1/2 space-y-3">
-          <div class="text-xs font-bold tracking-wider text-amber-700 uppercase" contenteditable="true">
-            专题讲座 · 学术视野
+    <!-- 卡片动态容器 -->
+    <div id="cardsContainer" class="space-y-20">
+
+      <!-- 心得项 1：左图右文 -->
+      <article class="reflection-card glass-card rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-10 hover:shadow-2xl transition duration-300 relative group" data-layout="normal">
+        <div class="w-full md:w-1/2 relative">
+          <div class="rounded-2xl overflow-hidden aspect-[4/3] shadow-md border-2 border-white/80 relative">
+            <img class="card-img w-full h-full object-cover transition duration-700 hover:scale-105" src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1000&auto=format&fit=crop" alt="讲座研讨">
+            <button onclick="triggerCardImageUpload(this)" class="edit-only hidden absolute bottom-3 right-3 bg-stone-900/80 hover:bg-stone-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-md backdrop-blur-md transition flex items-center gap-1.5">
+              <i class="ph-bold ph-camera"></i> 更换图片
+            </button>
           </div>
-          <h3 class="text-xl md:text-2xl font-bold text-stone-900" contenteditable="true">
-            在传统文脉与前沿视野中求索
+          <div class="text-center md:text-left mt-3">
+            <span class="text-xs text-stone-400 font-serif-sc" contenteditable="false" data-editable>随园讲堂中的理论思辨</span>
+          </div>
+        </div>
+
+        <div class="w-full md:w-1/2 space-y-4">
+          <div class="inline-block px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold tracking-wider uppercase" contenteditable="false" data-editable>
+            学术研讨 · 视野拓展
+          </div>
+          <h3 class="text-2xl md:text-3xl font-serif-sc font-bold text-stone-900 leading-snug" contenteditable="false" data-editable>
+            在古典与现代语境间穿行
           </h3>
-          <p class="text-stone-600 text-sm md:text-base leading-relaxed" contenteditable="true">
-            在此输入心得正文。点击即可直接打字修改。记录你在南师大学术讲座与课堂讨论中的思想碰撞，以及从马来西亚多元文化视角对学术议题的崭新观察。
+          <p class="text-stone-600 leading-relaxed text-sm md:text-base text-justify" contenteditable="false" data-editable>
+            【在此输入你的第一段心得】：南师大随园的古朴与浓厚学风，赋予了研讨会独特的厚重感。在探讨专业议题时，大陆学者的理论沉淀与马来西亚多元语境带来的跨文化视角产生了精彩碰撞。这不仅是一场知识的输入，更是对原有学术思维维度的重新审视。
           </p>
         </div>
+
+        <!-- 删除本张卡片按钮 -->
+        <button onclick="deleteCard(this)" class="edit-only hidden absolute top-4 right-4 bg-rose-100 hover:bg-rose-200 text-rose-700 w-8 h-8 rounded-full items-center justify-center transition" title="删除本条">
+          <i class="ph-bold ph-trash"></i>
+        </button>
       </article>
 
-      <!-- 初始心得卡片 2 -->
-      <article class="journal-card glass-card rounded-3xl p-6 md:p-8 flex flex-col md:flex-row-reverse items-center gap-8 relative group transition hover:-translate-y-1 duration-300">
-        <button onclick="removeCard(this)" class="absolute top-4 right-4 text-stone-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-2 text-sm" title="删除该条记录">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-        <div class="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 relative group/img">
-          <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?auto=format&fit=crop&w=800&q=80" alt="古建参访" class="w-full h-full object-cover">
-          <label class="absolute inset-0 bg-stone-900/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center cursor-pointer text-white text-xs font-medium gap-1">
-            <i class="fa-solid fa-image"></i> 更换照片
-            <input type="file" accept="image/*" class="hidden" onchange="replaceCardImage(event, this)">
-          </label>
-        </div>
-        <div class="w-full md:w-1/2 space-y-3">
-          <div class="text-xs font-bold tracking-wider text-teal-700 uppercase" contenteditable="true">
-            文化参访 · 空间体悟
+      <!-- 心得项 2：右图左文 -->
+      <article class="reflection-card glass-card rounded-3xl p-6 md:p-8 flex flex-col md:flex-row-reverse items-center gap-10 hover:shadow-2xl transition duration-300 relative group" data-layout="reverse">
+        <div class="w-full md:w-1/2 relative">
+          <div class="rounded-2xl overflow-hidden aspect-[4/3] shadow-md border-2 border-white/80 relative">
+            <img class="card-img w-full h-full object-cover transition duration-700 hover:scale-105" src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1000&auto=format&fit=crop" alt="文化参访">
+            <button onclick="triggerCardImageUpload(this)" class="edit-only hidden absolute bottom-3 right-3 bg-stone-900/80 hover:bg-stone-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-md backdrop-blur-md transition flex items-center gap-1.5">
+              <i class="ph-bold ph-camera"></i> 更换图片
+            </button>
           </div>
-          <h3 class="text-xl md:text-2xl font-bold text-stone-900" contenteditable="true">
-            穿过飞檐黛瓦的历史回廊
+          <div class="text-center md:text-left mt-3">
+            <span class="text-xs text-stone-400 font-serif-sc" contenteditable="false" data-editable>金陵砖瓦下的历史与空间凝结</span>
+          </div>
+        </div>
+
+        <div class="w-full md:w-1/2 space-y-4">
+          <div class="inline-block px-3 py-1 bg-rose-100 text-rose-900 rounded-full text-xs font-bold tracking-wider uppercase" contenteditable="false" data-editable>
+            空间感知 · 文化沉浸
+          </div>
+          <h3 class="text-2xl md:text-3xl font-serif-sc font-bold text-stone-900 leading-snug" contenteditable="false" data-editable>
+            青砖黛瓦间的时光沉淀
           </h3>
-          <p class="text-stone-600 text-sm md:text-base leading-relaxed" contenteditable="true">
-            现场考察金陵古迹与百年随园，青砖与黛瓦之间沉淀着深厚的人文底蕴。亲临其境的感受，远胜于隔着书卷的远观。
+          <p class="text-stone-600 leading-relaxed text-sm md:text-base text-justify" contenteditable="false" data-editable>
+            【在此输入你的第二段心得】：漫步于南京的历史街区与文保建筑群，历史不再是书页上单薄的年代数字，而是转化为触手可及的砖石雕花与空间气韵。实地考察让理论文本与物质空间重叠，深深体会到传统文化符号在当代城市肌理中的活态延续。
           </p>
         </div>
+
+        <button onclick="deleteCard(this)" class="edit-only hidden absolute top-4 right-4 bg-rose-100 hover:bg-rose-200 text-rose-700 w-8 h-8 rounded-full items-center justify-center transition" title="删除本条">
+          <i class="ph-bold ph-trash"></i>
+        </button>
       </article>
 
+    </div>
+
+    <!-- 添加新卡片按钮（编辑模式下可见） -->
+    <div class="mt-12 text-center edit-only hidden">
+      <button onclick="addNewCard()" class="inline-flex items-center gap-2 bg-white hover:bg-amber-50 text-amber-900 border-2 border-dashed border-amber-300 px-8 py-4 rounded-2xl font-semibold shadow-sm transition hover:shadow-md">
+        <i class="ph-bold ph-plus-circle text-lg text-amber-600"></i>
+        <span>添加一条新的图文心得</span>
+      </button>
     </div>
   </main>
 
-  <!-- 3. 总结区 -->
-  <section id="summary" class="max-w-4xl mx-auto px-6 py-12">
-    <div class="glass-card rounded-3xl p-8 md:p-12 space-y-6">
-      <div class="flex items-center gap-3">
-        <span class="w-1.5 h-6 bg-amber-700 rounded-full"></span>
-        <h2 class="text-2xl font-bold text-stone-900">行思结语</h2>
+  <!-- 3. 研学总结与致谢区 -->
+  <section class="max-w-4xl mx-auto px-6 py-16 mb-20">
+    <div class="glass-card rounded-3xl p-8 md:p-12 text-center relative overflow-hidden border border-amber-200/60 shadow-xl">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-700 mb-6">
+        <i class="ph-fill ph-book-open-text text-2xl"></i>
       </div>
-      <p class="text-stone-700 leading-relaxed text-base" contenteditable="true" id="summary-text">
-        回顾本次短期交流，不仅拓宽了学术视野与知识边界，更在师友探讨与实地走访中获得了深刻的跨文化体验。感谢南京师范大学与马来亚大学提供的宝贵研学契机，这段丰饶的学术与人文旅程，将成为未来求学路上持之以恒的滋养。
+      <h2 class="text-2xl md:text-3xl font-serif-sc font-bold text-stone-900 mb-4" contenteditable="false" data-editable>
+        归途与展望 · 结语致谢
+      </h2>
+      <p class="text-stone-600 leading-relaxed text-sm md:text-base text-justify max-w-2xl mx-auto mb-6" contenteditable="false" data-editable>
+        【在此输入你的总结感悟】：短期的南京交流充实而丰盈，它不仅拓宽了我的专业视野，更让我结识了志同道合的师友。衷心感谢南京师范大学热情周到的学术安排与接待，也感谢马来亚大学提供的宝贵交流契机。行远自迩，笃行不怠。
       </p>
-      <div class="pt-4 border-t border-stone-200/60 flex justify-between items-center text-xs text-stone-500">
-        <span contenteditable="true">报告人：马来亚大学交流生</span>
-        <span contenteditable="true">2026 年 10 月</span>
+      <div class="pt-6 border-t border-stone-200/60 flex flex-wrap items-center justify-center gap-6 text-xs text-stone-500 font-medium">
+        <span>#NNU2026</span>
+        <span>•</span>
+        <span>#马来亚大学短期学习交流班</span>
+        <span>•</span>
+        <span contenteditable="false" data-editable>报告人：马来亚大学学生</span>
       </div>
     </div>
   </section>
 
-  <!-- 模态框：添加新心得 -->
-  <div id="add-modal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-stone-200 space-y-4">
-      <h3 class="text-xl font-bold text-stone-900 flex items-center gap-2">
-        <i class="fa-solid fa-pen-nib text-amber-700"></i> 新增游学心得
-      </h3>
-      
-      <div>
-        <label class="block text-xs font-semibold text-stone-600 mb-1">选择照片</label>
-        <input type="file" id="modal-img-input" accept="image/*" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-800 hover:file:bg-amber-100">
-      </div>
+  <!-- 页脚 -->
+  <footer class="max-w-6xl mx-auto px-6 py-8 text-center text-xs text-stone-400 border-t border-stone-200/60">
+    <p>NNU 2026 短期交流项目 · 独立游学报告</p>
+  </footer>
 
-      <div>
-        <label class="block text-xs font-semibold text-stone-600 mb-1">心得分类标签 (如：学术视野 / 文化寻迹)</label>
-        <input type="text" id="modal-tag" placeholder="例如：实地参访 · 文化寻迹" class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-amber-600">
-      </div>
-
-      <div>
-        <label class="block text-xs font-semibold text-stone-600 mb-1">心得主题标题</label>
-        <input type="text" id="modal-title" placeholder="输入这篇心得的醒目标题" class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-amber-600">
-      </div>
-
-      <div>
-        <label class="block text-xs font-semibold text-stone-600 mb-1">心得正文</label>
-        <textarea id="modal-body" rows="4" placeholder="在此写下你对这张照片背后的观察、思考与感悟..." class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-amber-600"></textarea>
-      </div>
-
-      <div class="flex justify-end gap-3 pt-2">
-        <button onclick="closeModal()" class="px-5 py-2 rounded-full text-stone-500 hover:bg-stone-100 text-sm">取消</button>
-        <button onclick="confirmAddCard()" class="px-6 py-2 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm font-semibold shadow">确认添加</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JavaScript 交互引擎 -->
+  <!-- 核心交互脚本：自由编辑 + 实时图片压缩替换 + 一键导出纯净静态网页 -->
   <script>
-    // 1. 更换封面图
-    function changeHeroImage(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => document.getElementById('hero-img').src = e.target.result;
-        reader.readAsDataURL(file);
-      }
-    }
+    let isEditing = false;
+    let targetImageElement = null;
 
-    // 2. 更换卡片中的单张图
-    function replaceCardImage(event, labelElem) {
-      const file = event.target.files[0];
-      if (file) {
-        const img = labelElem.parentElement.querySelector('img');
-        const reader = new FileReader();
-        reader.onload = e => img.src = e.target.result;
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // 3. 删除心得卡片
-    function removeCard(btn) {
-      if (confirm('确认删除这一篇心得吗？')) {
-        btn.closest('article').remove();
-      }
-    }
-
-    // 4. 模态框打开与关闭
-    function openModal() { document.getElementById('add-modal').classList.remove('hidden'); }
-    function closeModal() { document.getElementById('add-modal').classList.add('hidden'); }
-
-    // 5. 确认添加心得
-    function confirmAddCard() {
-      const tag = document.getElementById('modal-tag').value.trim() || '交流纪实';
-      const title = document.getElementById('modal-title').value.trim() || '心得感悟';
-      const body = document.getElementById('modal-body').value.trim() || '在这里输入更深入的心得细节...';
-      const fileInput = document.getElementById('modal-img-input');
+    // 切换编辑模式
+    function toggleEditMode() {
+      isEditing = !isEditing;
+      document.body.classList.toggle('editing', isEditing);
       
-      const container = document.getElementById('cards-container');
-      const isReverse = container.children.length % 2 === 1 ? 'md:flex-row-reverse' : '';
+      const editBtnText = document.getElementById('editBtnText');
+      const editOnlyElements = document.querySelectorAll('.edit-only');
+      const editables = document.querySelectorAll('[data-editable]');
 
-      const appendCardWithImage = (src) => {
-        const article = document.createElement('article');
-        article.className = `journal-card glass-card rounded-3xl p-6 md:p-8 flex flex-col ${isReverse} items-center gap-8 relative group transition hover:-translate-y-1 duration-300`;
-        article.innerHTML = `
-          <button onclick="removeCard(this)" class="absolute top-4 right-4 text-stone-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-2 text-sm" title="删除该条记录">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-          <div class="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 relative group/img">
-            <img src="${src}" alt="心得配图" class="w-full h-full object-cover">
-            <label class="absolute inset-0 bg-stone-900/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center cursor-pointer text-white text-xs font-medium gap-1">
-              <i class="fa-solid fa-image"></i> 更换照片
-              <input type="file" accept="image/*" class="hidden" onchange="replaceCardImage(event, this)">
-            </label>
-          </div>
-          <div class="w-full md:w-1/2 space-y-3">
-            <div class="text-xs font-bold tracking-wider text-amber-700 uppercase" contenteditable="true">${tag}</div>
-            <h3 class="text-xl md:text-2xl font-bold text-stone-900" contenteditable="true">${title}</h3>
-            <p class="text-stone-600 text-sm md:text-base leading-relaxed" contenteditable="true">${body}</p>
-          </div>
-        `;
-        container.appendChild(article);
-        closeModal();
-      };
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => appendCardWithImage(e.target.result);
-        reader.readAsDataURL(fileInput.files[0]);
+      if (isEditing) {
+        editBtnText.innerText = "完成并锁定编辑";
+        editOnlyElements.forEach(el => el.classList.remove('hidden'));
+        editables.forEach(el => el.setAttribute('contenteditable', 'true'));
       } else {
-        appendCardWithImage('https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=800&q=80');
+        editBtnText.innerText = "开启自由编辑";
+        editOnlyElements.forEach(el => el.classList.add('hidden'));
+        editables.forEach(el => el.setAttribute('contenteditable', 'false'));
       }
     }
 
-    // 6. 核心：导出最新 HTML 文件（所有人都能看到！）
-    function exportAndDownload() {
-      // 克隆整个文档以清理临时操作痕迹
+    // 触发图片上传
+    function triggerImageUpload(imgId) {
+      targetImageElement = document.getElementById(imgId);
+      document.getElementById('imageInput').click();
+    }
+
+    function triggerCardImageUpload(button) {
+      targetImageElement = button.closest('.relative').querySelector('.card-img');
+      document.getElementById('imageInput').click();
+    }
+
+    // 读取本地图片并自动优化转为 Base64（让导出的单文件能直接带图跑，不需要图床）
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file || !targetImageElement) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // 自动压缩至合适尺寸（最大宽 1600px，质量 0.85），防止文件体积过大
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1600;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 转为 webp 或 jpeg 格式的 Base64
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          targetImageElement.src = compressedDataUrl;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    // 添加新的心得卡片
+    function addNewCard() {
+      const container = document.getElementById('cardsContainer');
+      const count = container.children.length;
+      const isReverse = count % 2 !== 0;
+
+      const card = document.createElement('article');
+      card.className = `reflection-card glass-card rounded-3xl p-6 md:p-8 flex flex-col ${isReverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-10 hover:shadow-2xl transition duration-300 relative group`;
+      card.setAttribute('data-layout', isReverse ? 'reverse' : 'normal');
+
+      card.innerHTML = `
+        <div class="w-full md:w-1/2 relative">
+          <div class="rounded-2xl overflow-hidden aspect-[4/3] shadow-md border-2 border-white/80 relative">
+            <img class="card-img w-full h-full object-cover transition duration-700 hover:scale-105" src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop" alt="记录瞬间">
+            <button onclick="triggerCardImageUpload(this)" class="edit-only ${isEditing ? '' : 'hidden'} absolute bottom-3 right-3 bg-stone-900/80 hover:bg-stone-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-md backdrop-blur-md transition flex items-center gap-1.5">
+              <i class="ph-bold ph-camera"></i> 更换图片
+            </button>
+          </div>
+          <div class="text-center md:text-left mt-3">
+            <span class="text-xs text-stone-400 font-serif-sc" contenteditable="${isEditing ? 'true' : 'false'}" data-editable>图片注记说明</span>
+          </div>
+        </div>
+
+        <div class="w-full md:w-1/2 space-y-4">
+          <div class="inline-block px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold tracking-wider uppercase" contenteditable="${isEditing ? 'true' : 'false'}" data-editable>
+            心得类别 · 主题
+          </div>
+          <h3 class="text-2xl md:text-3xl font-serif-sc font-bold text-stone-900 leading-snug" contenteditable="${isEditing ? 'true' : 'false'}" data-editable>
+            点击输入这篇心得的主标题
+          </h3>
+          <p class="text-stone-600 leading-relaxed text-sm md:text-base text-justify" contenteditable="${isEditing ? 'true' : 'false'}" data-editable>
+            点击此处输入你的心得正文。详细写下在交流期间的具体观察、与当地师生或同伴的交流体验，以及带给你的反思……
+          </p>
+        </div>
+
+        <button onclick="deleteCard(this)" class="edit-only ${isEditing ? '' : 'hidden'} absolute top-4 right-4 bg-rose-100 hover:bg-rose-200 text-rose-700 w-8 h-8 rounded-full items-center justify-center transition" title="删除本条">
+          <i class="ph-bold ph-trash"></i>
+        </button>
+      `;
+
+      container.appendChild(card);
+    }
+
+    // 删除卡片
+    function deleteCard(button) {
+      if (confirm('确定要删除这条图文心得吗？')) {
+        button.closest('article').remove();
+      }
+    }
+
+    // 一键导出：生成一份已经内嵌所有修改后的文字和图片的纯净静态 HTML
+    function exportStaticHTML() {
+      // 1. 先退出编辑状态，移除所有临时编辑边框和编辑按钮
+      if (isEditing) toggleEditMode();
+
+      // 2. 克隆当前文档
       const docClone = document.documentElement.cloneNode(true);
 
-      // 关闭/移除编辑专用的模态框
-      const modal = docClone.querySelector('#add-modal');
-      if (modal) modal.remove();
+      // 3. 在克隆的代码中，把底部的编辑悬浮窗、隐藏的文件输入框彻底剥离，保持给老师看的网页绝对纯净
+      const toolbar = docClone.querySelector('aside');
+      if (toolbar) toolbar.remove();
+      const input = docClone.querySelector('#imageInput');
+      if (input) input.remove();
+      const script = docClone.querySelector('script:last-of-type');
+      if (script) script.remove();
 
-      // 将所有 contenteditable 移除，变成供别人阅读的成品状态
+      // 移除所有编辑按钮
+      docClone.querySelectorAll('.edit-only').forEach(el => el.remove());
       docClone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
 
-      // 移除控制悬浮栏
-      const ctrlBar = docClone.querySelector('.fixed.top-4.right-4');
-      if (ctrlBar) ctrlBar.remove();
+      // 4. 打包并触发浏览器下载
+      const fullHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-      // 移除每张卡片上的删除按钮
-      docClone.querySelectorAll('button[onclick*="removeCard"]').forEach(b => b.remove());
-
-      // 移除换图遮罩
-      docClone.querySelectorAll('label[class*="group-hover/img"]').forEach(l => l.remove());
-      docClone.querySelectorAll('label[class*="group-hover"]').forEach(l => l.remove());
-
-      // 生成干净的 HTML 字符串
-      const finalHtml = '<!DOCTYPE html>\n' + docClone.outerHTML;
-
-      // 触发自动下载 index.html
-      const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'index.html';
-      link.click();
-      URL.revokeObjectURL(link.href);
-
-      alert('🎉 已生成最终发布的 index.html！\n\n只需把这个下载好的 index.html 传上 GitHub 仓库覆盖旧文件，任何设备点开网址都能看到你最新添加的所有照片和心得！');
+      alert("🎉 导出成功！\n\n新下载的「index.html」已经把你写的所有文字和上传的图片完全内嵌封存！\n现在只需要把这个 index.html 直接上传替换 GitHub 仓库中的同名文件，别人打开就能立刻看到你刚才排好的全部精彩内容！");
     }
   </script>
 </body>
